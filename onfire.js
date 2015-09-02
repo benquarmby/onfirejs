@@ -1,4 +1,15 @@
-var onfire = (function () {
+(function (factory) {
+    'use strict';
+
+    if (typeof define === 'function' && define.amd) {
+        define(['exports'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        factory(module.exports);
+    } else {
+        window.onfire = {};
+        factory(window.onfire);
+    }
+}(function (exports) {
     'use strict';
 
     function createEvent(target, event) {
@@ -97,8 +108,6 @@ var onfire = (function () {
         };
     }
 
-    return {
-        createEvents: createEvents,
-        createContext: createContext
-    };
-}());
+    exports.createEvents = createEvents;
+    exports.createContext = createContext;
+}));
