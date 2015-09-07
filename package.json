@@ -1,0 +1,13 @@
+{
+  "name": "onfirejs",
+  "description": "Encapsulated, magic-string free eventing for JavaScript.",
+  "version": "1.0.0",
+  "devDependencies": {
+    "colors": "^1.1.2",
+    "event-stream": "^3.3.1",
+    "gulp": "^3.9.0",
+    "gulp-jasmine": "^2.0.1",
+    "gulp-util": "^3.0.6",
+    "jasmine": "^2.3.2"
+  }
+}

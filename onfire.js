@@ -1,3 +1,5 @@
+/*global define, window*/
+
 (function (factory) {
     'use strict';
 
