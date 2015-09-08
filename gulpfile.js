@@ -1,12 +1,17 @@
 'use strict';
 
 var gulp = require('gulp');
-var jslint = require('./gulp-jslint.js');
 var jasmine = require('gulp-jasmine');
+var jslint = require('./gulp-jslint.js');
 
-gulp.task('lint', function () {
-    return gulp.src(['./**/*.js', './**/*.json', '!./node_modules/**'])
-        .pipe(jslint({
+gulp.task('load-jslint', function () {
+    return gulp.src('./jslint/jslint.js')
+        .pipe(jslint.load());
+});
+
+gulp.task('lint', ['load-jslint'], function () {
+    return gulp.src(['./**/*.js', './**/*.json', '!./node_modules/**', '!./jslint/**'])
+        .pipe(jslint.lint({
             node: true
         }));
 });

@@ -2,8 +2,22 @@
 
 var eventStream = require('event-stream');
 var gulpUtil = require('gulp-util');
-var jslint = require('./jslint.js');
 var colors = require('colors/safe');
+var vm = require('vm');
+
+var context = {};
+
+function loadJSLint(source, callback) {
+    var contents = source.contents.toString('utf8');
+
+    vm.runInNewContext(contents, context);
+
+    callback(null, source);
+}
+
+function loadStream() {
+    return eventStream.map(loadJSLint);
+}
 
 function logWarning(warning) {
     var message = [
@@ -21,9 +35,13 @@ function logWarning(warning) {
 function lintStream(options, globals) {
     var errors = 0;
 
+    if (!context.jslint) {
+        throw new gulpUtil.PluginError('gulp-jslint', 'JSLint has not been loaded.');
+    }
+
     function lint(source, callback) {
         var contents = source.contents.toString('utf8');
-        var result = jslint(contents, options, globals);
+        var result = context.jslint(contents, options, globals);
 
         if (result.ok) {
             gulpUtil.log(colors.green(source.path));
@@ -53,4 +71,7 @@ function lintStream(options, globals) {
         .on('end', onEnd);
 }
 
-module.exports = lintStream;
+module.exports = {
+    load: loadStream,
+    lint: lintStream
+};
