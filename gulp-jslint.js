@@ -5,23 +5,25 @@ var gulpUtil = require('gulp-util');
 var jslint = require('./jslint.js');
 var colors = require('colors/safe');
 
-module.exports = function (options, globals) {
+function logWarning(warning) {
+    var message = [
+        '    ',
+        warning.line + 1,
+        ':',
+        warning.column + 1,
+        ': ',
+        warning.message
+    ];
+
+    gulpUtil.log(colors.red(message.join('')));
+}
+
+function lintStream(options, globals) {
     var errors = 0;
 
     function lint(source, callback) {
-        if (source.isStream()) {
-            callback(new gulpUtil.PluginError('gulp-jslint', 'Bad input file ' + source.path), source);
-
-            return;
-        }
-
-        if (source.isNull()) {
-            callback(null, source);
-
-            return;
-        }
-
-        var result = jslint(source.contents.toString('utf8'), options, globals);
+        var contents = source.contents.toString('utf8');
+        var result = jslint(contents, options, globals);
 
         if (result.ok) {
             gulpUtil.log(colors.green(source.path));
@@ -30,12 +32,7 @@ module.exports = function (options, globals) {
 
             errors += result.warnings.length;
 
-            result.warnings.forEach(function (warning) {
-                gulpUtil.log(colors.red('    ' +
-                        (warning.line + 1) + ':' +
-                        (warning.column + 1) + ': ' +
-                        warning.message));
-            });
+            result.warnings.forEach(logWarning);
         }
 
         callback(null, source);
@@ -43,11 +40,17 @@ module.exports = function (options, globals) {
 
     function onEnd() {
         if (errors) {
-            throw new gulpUtil.PluginError('gulp-jslint', errors + ' JSLint errors found.');
+            var message = errors === 1
+                ? 'JSLint found one error.'
+                : 'JSLint found ' + errors + ' errors.';
+
+            throw new gulpUtil.PluginError('gulp-jslint', message);
         }
     }
 
     return eventStream
         .map(lint)
         .on('end', onEnd);
-};
+}
+
+module.exports = lintStream;

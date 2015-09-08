@@ -1,4 +1,4 @@
-/*global describe, it, expect*/
+/*global jasmine, describe, it, expect*/
 
 var onfire = require('./onfire.js');
 
@@ -28,5 +28,37 @@ describe('onfire', function () {
             expect(typeof actual.fire.click).toBe('function');
             expect(typeof actual.fire.doubleClick).toBe('function');
         });
+    });
+
+    it('should invoke event listener', function () {
+        var actual = onfire.createEvents(['shown']);
+        var onActualShown = jasmine.createSpy('onShown');
+
+        actual.on.shown(onActualShown);
+        actual.fire.shown();
+
+        expect(onActualShown).toHaveBeenCalled();
+    });
+
+    it('should not invoke auto removed listener', function () {
+        var actual = onfire.createEvents(['shown']);
+        var onActualShown = jasmine.createSpy('onShown');
+
+        var off = actual.on.shown(onActualShown);
+        off();
+        actual.fire.shown();
+
+        expect(onActualShown).not.toHaveBeenCalled();
+    });
+
+    it('should not invoke manually removed listener', function () {
+        var actual = onfire.createEvents(['shown']);
+        var onActualShown = jasmine.createSpy('onShown');
+
+        actual.on.shown(onActualShown);
+        actual.off.shown(onActualShown);
+        actual.fire.shown();
+
+        expect(onActualShown).not.toHaveBeenCalled();
     });
 });
