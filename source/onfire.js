@@ -16,26 +16,47 @@
 
     function createEvent(target, event) {
         var listeners = [];
+        var removers = [];
 
         function removeByIndex(index) {
             delete listeners[index];
+            delete removers[index];
         }
 
-        function removeByReference(reference) {
-            listeners.forEach(function (listener, index) {
-                if (listener === reference) {
-                    removeByIndex(index);
-                }
-            });
+        function createRemover(index) {
+            function remove() {
+                removeByIndex(index);
+            }
+
+            remove.isRemover = true;
+            removers[index] = remove;
+
+            return remove;
         }
 
-        function addListener(listener) {
-            var index = listeners.length;
+        function eventOn(listener) {
+            if (typeof listener !== 'function') {
+                throw new Error('The specified listener is not a function.');
+            }
+
+            var index = listeners.indexOf(listener);
+
+            if (index >= 0) {
+                return removers[index];
+            }
+
+            index = listeners.length;
             listeners[index] = listener;
 
-            return function () {
+            return createRemover(index);
+        }
+
+        function eventOff(reference) {
+            var index = listeners.indexOf(reference);
+
+            if (index >= 0) {
                 removeByIndex(index);
-            };
+            }
         }
 
         function fireEvent(data) {
@@ -44,8 +65,8 @@
             });
         }
 
-        target.on[event] = addListener;
-        target.off[event] = removeByReference;
+        target.on[event] = eventOn;
+        target.off[event] = eventOff;
         target.fire[event] = fireEvent;
     }
 
@@ -64,48 +85,26 @@
     }
 
     function createContext() {
-        var definitions = [];
+        var removers = [];
 
-        function removeByIndex(index) {
-            definitions[index].remover();
-
-            delete definitions[index];
-        }
-
-        function removeByReference(event, listener) {
-            definitions.forEach(function (definition, index) {
-                if (definition.listener === listener && definition.event === event) {
-                    removeByIndex(index);
-                }
-            });
-        }
-
-        function addListener(event, listener) {
+        function add(event, listener) {
             var remover = event(listener);
-            var index = definitions.length;
 
-            definitions[index] = {
-                event: event,
-                listener: listener,
-                remover: remover
-            };
+            removers.push(remover);
 
-            return function () {
-                removeByIndex(index);
-            };
+            return remover;
         }
 
         function dispose() {
-            definitions.forEach(function (ignore, index) {
-                removeByIndex(index);
+            removers.forEach(function (remover) {
+                remover();
             });
 
-            definitions = null;
+            removers = null;
         }
 
         return {
-            on: addListener,
-            off: removeByReference,
+            add: add,
             dispose: dispose
         };
     }

@@ -30,6 +30,82 @@ describe('onfire', function () {
         });
     });
 
+    describe('createContext', function () {
+        it('should invoke listeners added to underlying events', function () {
+            var showEvents = onfire.createEvents(['shown']);
+            var hideEvents = onfire.createEvents(['hidden']);
+            var onShown = jasmine.createSpy('onShown');
+            var onHidden = jasmine.createSpy('onHidden');
+
+            var context = onfire.createContext();
+
+            context.add(showEvents.on.shown, onShown);
+            context.add(hideEvents.on.hidden, onHidden);
+
+            showEvents.fire.shown();
+            hideEvents.fire.hidden();
+
+            expect(onShown).toHaveBeenCalled();
+            expect(onHidden).toHaveBeenCalled();
+        });
+
+        it('should not invoke manually removed listeners', function () {
+            var showEvents = onfire.createEvents(['shown']);
+            var hideEvents = onfire.createEvents(['hidden']);
+            var onShown = jasmine.createSpy('onShown');
+            var onHidden = jasmine.createSpy('onHidden');
+
+            var context = onfire.createContext();
+
+            context.add(showEvents.on.shown, onShown);
+            context.add(hideEvents.on.hidden, onHidden);
+
+            hideEvents.off.hidden(onHidden);
+
+            showEvents.fire.shown();
+            hideEvents.fire.hidden();
+
+            expect(onShown).toHaveBeenCalled();
+            expect(onHidden).not.toHaveBeenCalled();
+        });
+
+        it('should not invoke auto removed listeners', function () {
+            var showEvents = onfire.createEvents(['shown']);
+            var hideEvents = onfire.createEvents(['hidden']);
+            var onShown = jasmine.createSpy('onShown');
+            var onHidden = jasmine.createSpy('onHidden');
+
+            var context = onfire.createContext();
+
+            var offShown = context.add(showEvents.on.shown, onShown);
+            context.add(hideEvents.on.hidden, onHidden);
+
+            offShown();
+
+            showEvents.fire.shown();
+            hideEvents.fire.hidden();
+
+            expect(onShown).not.toHaveBeenCalled();
+            expect(onHidden).toHaveBeenCalled();
+        });
+
+        it('should not throw when removing multiple times', function () {
+            var showEvents = onfire.createEvents(['shown']);
+            var onShown = jasmine.createSpy('onShown');
+
+            var context = onfire.createContext();
+
+            var offShown = context.add(showEvents.on.shown, onShown);
+            offShown();
+            showEvents.off.shown(onShown);
+            context.dispose();
+
+            showEvents.fire.shown();
+
+            expect(onShown).not.toHaveBeenCalled();
+        });
+    });
+
     it('should invoke event listener', function () {
         var actual = onfire.createEvents(['shown']);
         var onActualShown = jasmine.createSpy('onShown');
