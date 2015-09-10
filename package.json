@@ -2,6 +2,8 @@
   "name": "onfirejs",
   "description": "Encapsulated, magic-string free eventing for JavaScript.",
   "version": "1.0.0",
+  "homepage": "https://github.com/benquarmby/onfirejs",
+  "author": "Ben Quarmby <ben@quarm.by>",
   "devDependencies": {
     "colors": "^1.1.2",
     "event-stream": "^3.3.1",
@@ -9,5 +11,17 @@
     "gulp-jasmine": "^2.0.1",
     "gulp-util": "^3.0.6",
     "jasmine": "^2.3.2"
+  },
+  "main": "source/onfire.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benquarmby/onfirejs.git"
+  },
+  "keywords": [
+    "events"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/benquarmby/onfirejs/issues"
   }
 }
