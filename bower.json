@@ -19,6 +19,7 @@
   "ignore": [
     "**/.*",
     "**/*-tests.js",
+    "jslint",
     "node_modules",
     "vendor",
     "package.json",
