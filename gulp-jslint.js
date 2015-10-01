@@ -6,6 +6,7 @@ var colors = require('colors/safe');
 var vm = require('vm');
 var fs = require('fs');
 
+var pluginName = 'gulp-jslint';
 var context = {};
 
 function logWarning(warning) {
@@ -48,7 +49,11 @@ function lintStream(options, globals) {
             return;
         }
 
-        fs.readFile('./jslint/jslint.js', 'utf8', function (ignore, jslint) {
+        fs.readFile('./jslint/jslint.js', 'utf8', function (err, jslint) {
+            if (err) {
+                throw new gulpUtil.PluginError(pluginName, err);
+            }
+
             vm.runInNewContext(jslint, context);
 
             lint(source, callback);
@@ -61,7 +66,7 @@ function lintStream(options, globals) {
                 ? 'JSLint found one error.'
                 : 'JSLint found ' + errors + ' errors.';
 
-            throw new gulpUtil.PluginError('gulp-jslint', message);
+            throw new gulpUtil.PluginError(pluginName, message);
         }
     }
 
@@ -70,6 +75,4 @@ function lintStream(options, globals) {
         .on('end', onEnd);
 }
 
-module.exports = {
-    lint: lintStream
-};
+module.exports = lintStream;

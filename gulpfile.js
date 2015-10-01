@@ -6,7 +6,7 @@ var jslint = require('./gulp-jslint.js');
 
 gulp.task('lint', function () {
     return gulp.src(['./**/*.js', './**/*.json', '!./node_modules/**', '!./jslint/**'])
-        .pipe(jslint.lint({
+        .pipe(jslint({
             node: true
         }));
 });
